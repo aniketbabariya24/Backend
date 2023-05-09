@@ -1,49 +1,80 @@
-const express= require('express');
-const jwt= require('jsonwebtoken');
-const bcrypt= require('bcrypt');
-const userRoute= express.Router();
+const express = require ("express");
 
-const {UserModel}= require('../models/User.model');
+// --------------->>>>>>>> Male Service Controller <<<<<<<<-------------------
+const {signup ,login ,getalluser ,getUser} = require("../controllers/user.controller");
 
-userRoute.post('/register', async(req,res)=>{
-    const {name,email,gender,password}= req.body;
- try {
-    bcrypt.hash(password, 4, async(err, securePass)=> {
-      if(err){
-        console.log(err);
-      }else{
-        const user= new UserModel({name,email,gender,password:securePass});
-        await user.save();
-        console.log(user);
-        res.send("Registered")
-      }
-    });
- } catch (error) {
-    console.log("Error while Register");
-    console.log(error);
- }
-});
+const userRouter = express.Router();
 
-userRoute.post('/login', async(req,res)=>{
-    const {email,password}= req.body;
-    try {
-        const user= await UserModel.find({email});
-        if(user.length>0){
-            bcrypt.compare(password, user[0].password, (err, result)=> {
-              if(result){
-                const token=jwt.sign({ course: "fullstack" }, "masai");
-                res.send(token);
-              }else{
-               res.send("Wrong Email / password");
-              }
-            });
-        }else{
-           res.send("Wrong Email / password");
-        }
-    } catch (error) {
-        console.log("Error while login");
-        console.log(error);
-    }
-})
 
-module.exports={userRoute}
+// --------->>>> GET <<<<<---------
+
+
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       required:
+ *         - name
+ *         - email
+ *       properties:
+ *         id:
+ *           type: string
+ *           description: The auto-generated id of the user
+ *         name:
+ *           type: string
+ *           description: User's name
+ *         email:
+ *           type: string
+ *           description: User's email
+ *       example:
+ *         id: d5fE_asz
+ *         name: Aniket Babariya
+ *         email: aniketb@gmail.com
+ */
+
+ /**
+  * @swagger
+  * tags:
+  *   name: Users
+  *   description: The User managing API
+  */
+
+/**
+ * @swagger
+ * /users:
+ *   get:
+ *     summary: Returns the list of all the Users
+ *     tags: [Users]
+ *     responses:
+ *       200:
+ *         description: The list of the Uers
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/User'
+ */
+
+
+
+userRouter.get("/", getalluser);
+
+// --------->>>> GET BY ID<<<<<---------
+userRouter.get("/:id", getUser);
+
+// --------->>>> POST SIGN UP <<<<<---------
+userRouter.post("/register", signup);
+
+// --------->>>> POST <<<<<--------- 
+userRouter.post("/login", login);
+
+
+// userRouter.get("/pp", logout);
+
+
+module.exports = { userRouter }  
+
